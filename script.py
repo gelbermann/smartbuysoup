@@ -12,19 +12,23 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import Resource, build
 
-from secret_keys import FROM_MAIL_ADDR, SMARTBUY_URL, TARGET_MAIL_ADDR, PRODUCTS
+from secret_keys import FROM_MAIL_ADDR, URLS, TARGET_MAIL_ADDR, PRODUCTS
 
 
-def main(products: List[str]):
-    html = get_page_data()
-    products_found = search_for_products(html, products)
-    if products_found is not None:
-        alert_me(products_found)
+def main(products_keywords: List[str], urls: List[str]):
+    for category, url in urls.items():
+        html = get_page_data(url)
+        products_found = search_for_products(html, products_keywords)
+        if products_found is not None:
+            print(f"products found in {category.title()}")
+            alert_me(products_found)
+        else:  
+            print(f"products not found in {category.title()}")
 
 
-def get_page_data() -> str:
-    """ Get HTML data of SMARTBUY_URL page as string. """
-    resp = requests.get(SMARTBUY_URL)
+def get_page_data(url: str) -> str:
+    """ Get HTML data of url page as string. """
+    resp = requests.get(url)
     return resp.text
 
 
@@ -126,4 +130,4 @@ def compose_message(products: Dict[str, List[str]]) -> Dict[str, str]:
 if __name__ == "__main__":
     # PRODUCTS should be a list of names/keywords for products that you want 
     # (capitalization doesn't matter)
-    main(PRODUCTS)  
+    main(PRODUCTS, URLS)  
